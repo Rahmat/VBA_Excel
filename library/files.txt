@@ -1,0 +1,24 @@
+Sub Save()
+	//make into proper function
+    Dim relativePath As String
+    Name = "C:\Users\Ramat\Desktop\excel\" & ActiveWorkbook.Name
+    ActiveWorkbook.SaveAs Filename:=Name
+End Sub
+
+Sub ExportSheet(from_sheet As String, to_sheet As String, Optional export_range As String = vbNullString)
+    If export_range = vbNullString Then
+        Sheets(from_sheet).Cells.Copy
+    Else
+        Sheets(from_sheet).Range(export_range).Copy
+    End If
+     
+    Sheets(to_sheet).Range("A1").PasteSpecial Paste:=xlPasteValues
+    Sheets(to_sheet).Range("A1").PasteSpecial Paste:=xlPasteFormats
+    
+    Application.CutCopyMode = False
+End Sub
+
+//alt?
+//Sub ExportSheet(from_sheet As String, to_sheet As String)
+//    Sheets(from_sheet).Cells.Copy Destination:=Sheets(to_sheet).Range("A1")
+//End Sub

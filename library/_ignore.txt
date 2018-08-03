@@ -1,0 +1,81 @@
+Sub RUN()
+    Call DoStuff("working", "ACD_OUTPUT", 13, , "A1:BL360")
+End Sub
+
+Sub DoStuff(from_sheet As String, to_sheet As String, Optional start_deleting_at As Integer = 1, Optional stop_deleting_at As Integer = 0, Optional export_range As String = vbNullString)
+    Application.ScreenUpdating = False
+    
+    Call ClearSheet(to_sheet)
+    Call ExportSheet(from_sheet, to_sheet, export_range)
+    Call DeleteBlankRows(to_sheet, start_deleting_at, stop_deleting_at, True)
+    
+    Application.ScreenUpdating = True
+End Sub
+
+Sub DeleteBlankRows(sheet As String, Optional start_deleting_at As Integer = 1, Optional stop_deleting_at As Integer = 0, Optional Debugging As Boolean = False)
+    Dim sh As Worksheet
+    Set sh = ThisWorkbook.Sheets(sheet)
+
+    If stop_deleting_at = 0 Then
+        stop_deleting_at = sh.UsedRange.Rows.Count
+    End If
+    
+    If stop_deleting_at < start_deleting_at Then
+        Call Err.Raise(5, "My Application", "Hi! You can't start at row " & CStr(start_deleting_at) & " and then stop at row " & CStr(stop_deleting_at) & "! Perhaps you'd want to switch around those two arguments?")
+    End If
+    
+    Dim i As Integer
+    For i = stop_deleting_at To start_deleting_at Step -1
+        If RowIsBlank(sheet, i, Debugging) Then
+            sh.Rows(i).Delete
+        End If
+    Next i
+End Sub
+
+Function RowIsBlank(sheet As String, RowNumber As Integer, Optional Debugging As Boolean = False) As Boolean
+    RowIsBlank = True
+    
+    Dim sh As Worksheet
+    Set sh = ThisWorkbook.Sheets(sheet)
+    
+    usedcols = sh.UsedRange.Rows(RowNumber).Columns.Count
+    blankcols = WorksheetFunction.CountBlank(sh.UsedRange.Rows(RowNumber))
+    
+    If usedcols = blankcols Then
+        Exit Function
+    End If
+    
+    For Each cell In sh.UsedRange.Rows(RowNumber).Cells
+        If cell.Value <> vbNullString Then
+            If Debugging Then
+                Debug.Print "Row #" & CStr(RowNumber) & " is not blank! Found value '" & cell.Value & "' in column " & CStr(cell.Column)
+            End If
+            
+            RowIsBlank = False
+            Exit Function
+        End If
+    Next cell
+    
+    Call Err.Raise(0, "My Application", "Hi! If the program ever hits this line, then there's a problem with how we're checking for blank rows!")
+End Function
+
+Sub ClearSheet(sheet_name As String)
+    Sheets(sheet_name).UsedRange.Clear
+End Sub
+
+Sub ExportSheet(from_sheet As String, to_sheet As String, Optional export_range As String = vbNullString)
+    If export_range = vbNullString Then
+        Sheets(from_sheet).Cells.Copy
+    Else
+        Sheets(from_sheet).Range(export_range).Copy
+    End If
+     
+    Sheets(to_sheet).Range("A1").PasteSpecial Paste:=xlPasteValues
+    Sheets(to_sheet).Range("A1").PasteSpecial Paste:=xlPasteFormats
+    
+    Application.CutCopyMode = False
+End Sub
+
+Sub ExportSheet(from_sheet As String, to_sheet As String)
+    Sheets(from_sheet).Cells.Copy Destination:=Sheets(to_sheet).Range("A1")
+End Sub

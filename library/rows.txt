@@ -1,0 +1,26 @@
+Function RowIsBlank(sheet As String, RowNumber As Integer, Optional Debugging As Boolean = False) As Boolean
+    RowIsBlank = True
+    
+    Dim sh As Worksheet
+    Set sh = ThisWorkbook.Sheets(sheet)
+    
+    usedcols = sh.UsedRange.Rows(RowNumber).Columns.Count
+    blankcols = WorksheetFunction.CountBlank(sh.UsedRange.Rows(RowNumber))
+    
+    If usedcols = blankcols Then
+        Exit Function
+    End If
+    
+    For Each cell In sh.UsedRange.Rows(RowNumber).Cells
+        If cell.Value <> vbNullString Then
+            If Debugging Then
+                Debug.Print "Row #" & CStr(RowNumber) & " is not blank! Found value '" & cell.Value & "' in column " & CStr(cell.Column)
+            End If
+            
+            RowIsBlank = False
+            Exit Function
+        End If
+    Next cell
+    
+    Call Err.Raise(0, "My Application", "Hi! If the program ever hits this line, then there's a problem with how we're checking for blank rows!")
+End Function

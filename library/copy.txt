@@ -1,0 +1,9 @@
+Sub Range_Copy_Examples()
+	//make into proper function
+    'Range("B1").Copy
+    'Range("C1").PasteSpecial xlPasteValues
+    'Range("D1").PasteSpecial xlPasteValues
+    
+    Range("D1") = Range("B1")
+End Sub
+
